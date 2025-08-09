@@ -10,9 +10,9 @@ const int MAX_UNITS = 10;
 const int REQUESTS = 10000;
 
 struct Block {
-    int start;
-    int size;
-    bool allocated;
+    int start; //starting unit index
+    int size; //num of units
+    bool allocated; //
     int process_id;
     Block* next;
 
@@ -21,10 +21,23 @@ struct Block {
 
 //abstract base class for memory manager
 class MemoryManager {
+protected:
+    Block* head;
 public:
+    MemoryManager() {
+        head = new Block(0, TOTAL_UNITS, false);
     virtual int allocate_mem(int process_id, int num_units) = 0;
     virtual int deallocate_mem(int process_id) = 0;
     virtual int fragment_count() const = 0;
+    virtual ~MemoryManager() {
+        //clean linked list
+        Block* current = head;
+        while(current) {
+            Block* temp = current;
+            current = current->next;
+            delete temp;
+        }
+    }
 };
 
 //first fit memory manager
@@ -63,5 +76,7 @@ struct Stats {
 
 //simulation function
 void run_simulation(MemoryManager& mem, Stats& stats);
+
+
 
 #endif // SIM_H

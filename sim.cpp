@@ -35,6 +35,8 @@ BestFitMemory::BestFitMemory() {
 
 int BestFitMemory::allocate_mem(int process_id, int num_units) {
     //TODO
+    int pid = process_id;
+
     return -1;
 }
 
@@ -49,7 +51,16 @@ int BestFitMemory::fragment_count() const {
 }
 
 //Stats
+//need average # of external fragments
+//average allocation time in terms of the average nodes traversed in allocation
+//percentage of times an allocation request is denied
 void Stats::record_allocation(int nodes, bool success) {
+    total_requests++;
+    if(!success) {
+        denied_requests++;
+    } else {
+        
+    }
 }
 
 void Stats::record_fragment_count(int fragments) {
