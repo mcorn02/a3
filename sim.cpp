@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include <climits> //for INT_MAX
 using namespace std;
 
 //implementation of blocks
@@ -37,21 +38,22 @@ int BestFitMemory::allocate_mem(int process_id, int num_units) {
     //TODO
     int nodes_traversed = 0;
     int best_fit_traversal = 0;
-    int min_waste = MAX_UNITS;
+    int min_waste = INT_MAX;
     Block* current = head;
     Block* best_fit = nullptr;
 
 
-    //traverse the linked list
+    //traverse the list
     while(current) {
         nodes_traversed++;
-        
-        //check if block is usable
-        if(current->process_id == -1 || current->size >= num_units) {
-            //waste calculation
-            int waste = current->size - num_units;
 
-            //check if this is new min_waste
+        //if free and big enough
+        if(current->process_id == -1 && current->size >= num_units) {
+            //calculate waste
+            int waste = current->size - num_units;
+            //if waste is smaller than min
+            //update best_fit
+            //mark nodes traversed
             if(waste < min_waste) {
                 min_waste = waste;
                 best_fit = current;
@@ -59,13 +61,16 @@ int BestFitMemory::allocate_mem(int process_id, int num_units) {
             }
         }
         current = current->next;
-        
-        if(best_fit) {
-            split_block(best_fit, num_units, process_id);
-            return best_fit_traversal;
-        }
     }
-    return -1;
+
+    //if best fit is found, split blocks
+    //return nodes traversed for best fit
+    if(best_fit) {
+        split_block(best_fit, num_units, process_id);
+        return best_fit_traversal;
+    }
+
+    return -1; //no block found
 }
 
 int BestFitMemory::deallocate_mem(int process_id) {
@@ -101,6 +106,23 @@ void run_simulation(MemoryManager& mem, Stats& stats) {
 }
 
 int main() {
-    cout << "running\n";
+    BestFitMemory mem;
+
+    //try to allocate 10 units for process 1
+    int nodes = mem.allocate_mem(1, 10);
+    cout << "Allocating 10 units for process 1, nodes traversed: " << nodes << endl;
+
+    //try to allocate 8 units for process 2
+    nodes = mem.allocate_mem(2, 8);
+    cout << "Allocating 8 units for process 2, nodes traversed: " << nodes << endl;
+    
+    //a third allocation
+    nodes = mem.allocate_mem(3, 15);
+    cout << "Allocating 15 units for process 3, nodes traversed: " << nodes << endl;
+    
+    //an impossible one
+    nodes = mem.allocate_mem(4, 200);
+    cout << "Allocating 200 units for process 4, nodes traversed: " << nodes << endl;
+
     return 0;
 }
