@@ -35,8 +35,36 @@ BestFitMemory::BestFitMemory() {
 
 int BestFitMemory::allocate_mem(int process_id, int num_units) {
     //TODO
-    int pid = process_id;
+    int nodes_traversed = 0;
+    int best_fit_traversal = 0;
+    int min_waste = MAX_UNITS;
+    Block* current = head;
+    Block* best_fit = nullptr;
 
+
+    //traverse the linked list
+    while(current) {
+        nodes_traversed++;
+        
+        //check if block is usable
+        if(current->process_id == -1 || current->size >= num_units) {
+            //waste calculation
+            int waste = current->size - num_units;
+
+            //check if this is new min_waste
+            if(waste < min_waste) {
+                min_waste = waste;
+                best_fit = current;
+                best_fit_traversal = nodes_traversed;
+            }
+        }
+        current = current->next;
+        
+        if(best_fit) {
+            split_block(best_fit, num_units, process_id);
+            return best_fit_traversal;
+        }
+    }
     return -1;
 }
 
