@@ -16,7 +16,24 @@ FirstFitMemory::FirstFitMemory() {
 
 int FirstFitMemory::allocate_mem(int process_id, int num_units) {
     //TODO
-    return -1;
+    Block* current = head;
+    int nodes_traversed = 0;
+
+    //traverse the list
+    while(current) {
+        nodes_traversed++;
+
+        //if free and big enough
+        if(current->process_id == -1 && current->size >= num_units) {
+            if(current->size > num_units) {
+                split_block(current, num_units, process_id);
+                return nodes_traversed;
+            }
+        }
+        current = current->next;
+    }
+
+    return -1; //no block found
 }
 
 int FirstFitMemory::deallocate_mem(int process_id) {
