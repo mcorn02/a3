@@ -40,11 +40,22 @@ int FirstFitMemory::allocate_mem(int process_id, int num_units) {
 
 int FirstFitMemory::deallocate_mem(int process_id) {
     //TODO
+    Block* current = head;
+    Block* prev = nullptr;
+
+    while(current) {
+        if(current->process_id == process_id) {
+            //mark block as free
+            current->allocated = false;
+            current->process_id = -1;
+
+            merge_block(prev, current);
+        }
+        prev = current;
+        current = current->next;
+    }
+
     return -1;
-}
-
-void FirstFitMemory::merge_block() {
-
 }
 
 int FirstFitMemory::fragment_count() const {
@@ -109,6 +120,7 @@ int BestFitMemory::allocate_mem(int process_id, int num_units) {
 int BestFitMemory::deallocate_mem(int process_id) {
     //TODO
     Block* current = head;
+    Block* prev = nullptr;
 
     while(current) {
         if(current->process_id == process_id) {
@@ -116,16 +128,15 @@ int BestFitMemory::deallocate_mem(int process_id) {
             current->allocated = false;
             current->process_id = -1;
 
-            merge_block();
+            merge_block(prev, current);
         }
+        prev = current;
+        current = current->next;
     }
 
     return -1;
 }
 
-void BestFitMemory::merge_block() {
-
-}
 
 int BestFitMemory::fragment_count() const {
     //TODO
@@ -192,7 +203,7 @@ int main() {
     vector<int> pids;
 
     int next_pid = 1;
-    for(int i = 0; i < 1000; ++i) {
+    for(int i = 0; i < 2; ++i) {
         int size = 3 + (rand() % 8);
         int result = mem.allocate_mem(next_pid, size);
         if(result != -1) {
@@ -206,6 +217,11 @@ int main() {
     cout << "----------------------------------\n";
 
     cout << "Fragments: " << mem.fragment_count() << endl;
+
+    cout << "DEALLOCATING MEMORY\n";
+
+    mem.deallocate_mem(1);
+    print_blocks(mem.get_head());
 
     return 0;
 }

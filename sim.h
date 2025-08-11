@@ -58,7 +58,22 @@ protected:
     }
 };
 
-    virtual void merge_block() {}
+    void merge_block(Block* prev, Block* current) {
+        //merge with next if next is free
+        if(current && current->next && current->next->process_id == -1) {
+            Block* next_block = current->next;
+            current->size += next_block->size;
+            current->next = next_block->next;
+            delete next_block;
+        }
+
+        //if previous is free, merge
+        if(prev && prev->process_id == -1 && current && current->process_id == -1) {
+            prev->size += current->size;
+            prev->next = current->next;
+            delete current;
+        }
+    }
         
 //first fit memory manager
 class FirstFitMemory : public MemoryManager {
@@ -67,8 +82,6 @@ public:
     int allocate_mem(int process_id, int num_units) override;
     int deallocate_mem(int process_id) override;
     int fragment_count() const override;
-protected:
-    void merge_block() override;
 };
 
 //Best Fit memory manager
@@ -77,10 +90,7 @@ public:
     BestFitMemory();
     int allocate_mem(int process_id, int num_units) override;
     int deallocate_mem(int process_id) override;
-    int fragment_count() const override;
- protected:
-    void merge_block() override;
-   
+    int fragment_count() const override;   
 };
 
 //statistics tracking 
