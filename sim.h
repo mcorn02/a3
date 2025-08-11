@@ -27,6 +27,9 @@ public:
     MemoryManager() {
         head = new Block(0, TOTAL_UNITS, false);
     }
+    
+    Block* get_head() const { return head; }
+
     virtual int allocate_mem(int process_id, int num_units) = 0;
     virtual int deallocate_mem(int process_id) = 0;
     virtual int fragment_count() const = 0;
@@ -55,6 +58,8 @@ protected:
     }
 };
 
+    virtual void merge_block() {}
+        
 //first fit memory manager
 class FirstFitMemory : public MemoryManager {
 public: 
@@ -62,6 +67,8 @@ public:
     int allocate_mem(int process_id, int num_units) override;
     int deallocate_mem(int process_id) override;
     int fragment_count() const override;
+protected:
+    void merge_block() override;
 };
 
 //Best Fit memory manager
@@ -71,6 +78,9 @@ public:
     int allocate_mem(int process_id, int num_units) override;
     int deallocate_mem(int process_id) override;
     int fragment_count() const override;
+ protected:
+    void merge_block() override;
+   
 };
 
 //statistics tracking 

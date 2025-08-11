@@ -1,8 +1,11 @@
 #include "sim.h"
 #include <iostream>
+#include <vector>
 #include <cstdlib>
 #include <ctime>
 #include <climits> //for INT_MAX
+
+
 using namespace std;
 
 //implementation of blocks
@@ -32,7 +35,6 @@ int FirstFitMemory::allocate_mem(int process_id, int num_units) {
         }
         current = current->next;
     }
-
     return -1; //no block found
 }
 
@@ -41,9 +43,24 @@ int FirstFitMemory::deallocate_mem(int process_id) {
     return -1;
 }
 
+void FirstFitMemory::merge_block() {
+
+}
+
 int FirstFitMemory::fragment_count() const {
     //TODO
-    return 0;
+    int count = 0;
+    Block* current = head;
+
+    while(current) {
+        //if block is unallocated and size 1 or 2
+        //count it as a fragment
+        if(current->process_id == -1 && (current->size == 1 || current->size == 2)) {
+            count++;
+        }
+        current = current->next;
+    }
+    return count;
 }
 
 //implementation of BestFit
@@ -52,7 +69,6 @@ BestFitMemory::BestFitMemory() {
 }
 
 int BestFitMemory::allocate_mem(int process_id, int num_units) {
-    //TODO
     int nodes_traversed = 0;
     int best_fit_traversal = 0;
     int min_waste = INT_MAX;
@@ -92,12 +108,39 @@ int BestFitMemory::allocate_mem(int process_id, int num_units) {
 
 int BestFitMemory::deallocate_mem(int process_id) {
     //TODO
+    Block* current = head;
+
+    while(current) {
+        if(current->process_id == process_id) {
+            //mark block as free
+            current->allocated = false;
+            current->process_id = -1;
+
+            merge_block();
+        }
+    }
+
     return -1;
+}
+
+void BestFitMemory::merge_block() {
+
 }
 
 int BestFitMemory::fragment_count() const {
     //TODO
-    return 0;
+    int count = 0;
+    Block* current = head;
+
+    while(current) {
+        //if block is unallocated and size 1 or 2
+        //count it as a fragment
+        if(current->process_id == -1 && (current->size == 1 || current->size == 2)) {
+            count++;
+        }
+        current = current->next;
+    }
+    return count;
 }
 
 //Stats
@@ -120,26 +163,49 @@ void print_summary(const string& name) {
 }
 
 void run_simulation(MemoryManager& mem, Stats& stats) {
+
 }
 
+
+
+//prints out blocks to give visual
+void print_blocks(Block* head) {
+    Block* current = head;
+
+    while(current) {
+        cout << "[start " << current->start
+        << ", size: " << current->size
+        << ", allocated: " << current->allocated
+        << ", process id: " << current->process_id
+        << "] -> ";
+        current = current->next;
+    }
+    cout << "NULL\n";
+}
+
+
+
 int main() {
-    BestFitMemory mem;
+    //BestFitMemory mem;
+    FirstFitMemory mem;
 
-    //try to allocate 10 units for process 1
-    int nodes = mem.allocate_mem(1, 10);
-    cout << "Allocating 10 units for process 1, nodes traversed: " << nodes << endl;
+    vector<int> pids;
 
-    //try to allocate 8 units for process 2
-    nodes = mem.allocate_mem(2, 8);
-    cout << "Allocating 8 units for process 2, nodes traversed: " << nodes << endl;
-    
-    //a third allocation
-    nodes = mem.allocate_mem(3, 15);
-    cout << "Allocating 15 units for process 3, nodes traversed: " << nodes << endl;
-    
-    //an impossible one
-    nodes = mem.allocate_mem(4, 200);
-    cout << "Allocating 200 units for process 4, nodes traversed: " << nodes << endl;
+    int next_pid = 1;
+    for(int i = 0; i < 1000; ++i) {
+        int size = 3 + (rand() % 8);
+        int result = mem.allocate_mem(next_pid, size);
+        if(result != -1) {
+            pids.push_back(next_pid);
+        }
+        ++next_pid;
+    }
+    cout << "FIRST FIT TEST\n";
+    cout << "----------------------------------\n";
+    print_blocks(mem.get_head());
+    cout << "----------------------------------\n";
+
+    cout << "Fragments: " << mem.fragment_count() << endl;
 
     return 0;
 }
