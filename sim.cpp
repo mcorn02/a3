@@ -6,7 +6,7 @@
 #include <climits> //for INT_MAX
 #include <random>
 #include <fstream>
-
+#include <iomanip>
 
 using namespace std;
 
@@ -192,8 +192,19 @@ void print_blocks(Block* head) {
     cout << "\n";
 }
 
+void Stats::print_summary(const string& name) {
+    int total_requests = REQUESTS;
+    int successful_allocs = total_requests - denied_requests;
 
-void print_summary(const string& name) {
+    double avg_fragments = static_cast<double>(total_fragments) / total_requests;
+    double avg_nodes = successful_allocs > 0 ? static_cast<double>(total_nodes_traversed) / successful_allocs : 0.0;
+    double deny_pct = (static_cast<double>(denied_requests) / total_requests) * 100.0;
+
+    cout << "End of " << name << " Allocation\n";
+    cout << "Average External Fragments Each Request: " << fixed << setprecision(6) << avg_fragments << "\n";
+    cout << "Average Nodes Traversed Each Allocation: " << fixed << setprecision(6) << avg_nodes << "\n";
+    cout << "Percentage Allocation Requests Denied Overall: " << fixed << setprecision(6) << deny_pct << "%\n";
+    cout << "\n";
 }
 
 bool allocate_or_not(int percentage) {
@@ -210,6 +221,8 @@ void run_simulation(MemoryManager& mem, Stats& stats) {
     const int percentage = 60; //60% allocate, 40% deallocate
 
     for(int step = 1; step <= REQUESTS; ++step) {
+
+
         bool perform_allocate = allocate_or_not(percentage);
 
         //if no memory allocated, we must allocate
@@ -231,9 +244,6 @@ void run_simulation(MemoryManager& mem, Stats& stats) {
             if(success) {
                 pids.push_back(next_pid);
             }
-
-            cout << "After allocation of PID: " << next_pid << "\n";
-            print_blocks(mem.get_head());
             next_pid++;
             
         } else {
@@ -241,20 +251,14 @@ void run_simulation(MemoryManager& mem, Stats& stats) {
             int i = rand() % pids.size();
             int pid = pids[i];
             mem.deallocate_mem(pid);
-            pids.erase(pids.begin() + i);
             
             //remove pid from list
             pids[i] = pids.back();
             pids.pop_back();
-
-            cout << "After deallocation of PID: " << i << "\n";
-            print_blocks(mem.get_head());
         }
 
         int fragments = mem.fragment_count();
         
-        cout << "\nCURRENT FRAGMENT COUNT: " << fragments << "\n";
-
         stats.record_fragment_count(fragments);
 
         csv << step << ","
@@ -268,17 +272,18 @@ void run_simulation(MemoryManager& mem, Stats& stats) {
 
 
 
-int main() {
-    //BestFitMemory mem;
-    
+int main() {    
     srand(static_cast<unsigned>(time(nullptr)));
 
-    Stats stats;
-    FirstFitMemory mem;
+    Stats ff_stats;
+    FirstFitMemory ff;
+    run_simulation(ff, ff_stats);
+    ff_stats.print_summary("First Fit");
 
-    run_simulation(mem, stats);
-    
-    cout << "\nFRAGMENT COUNT" << mem.fragment_count() << "\n";
+    BestFitMemory bf;
+    Stats bf_stats;
+    run_simulation(bf, bf_stats);
+    bf_stats.print_summary("Best Fit");
 
     return 0;
 }
