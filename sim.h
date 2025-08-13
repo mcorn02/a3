@@ -25,7 +25,7 @@ protected:
     Block* head;
 public:
     MemoryManager() {
-        head = new Block(0, TOTAL_UNITS, false);
+        head = new Block(0, TOTAL_UNITS, false, -1);
     }
     
     Block* get_head() const { return head; }

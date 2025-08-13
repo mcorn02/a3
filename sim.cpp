@@ -4,7 +4,8 @@
 #include <cstdlib>
 #include <ctime>
 #include <climits> //for INT_MAX
-#include <random> 
+#include <random>
+#include <fstream>
 
 
 using namespace std;
@@ -131,7 +132,7 @@ int BestFitMemory::deallocate_mem(int process_id) {
             current->process_id = -1;
 
             merge_block(prev, current);
-            return 0;
+            return 1;
         }
         prev = current;
         current = current->next;
@@ -200,13 +201,8 @@ bool allocate_or_not(int percentage) {
 }
 
 void run_simulation(MemoryManager& mem, Stats& stats) {
-    //need to swap between allocate and deallocate
-    //maybe 60% allocation, 40% deallocation
-    //int r = rand() % 100 random # 0 to 99
-    //allocate if r < 60 else deallocate
-    //we can't deallocate memory that isn't allocated
-    //need a vector or something to hold pids that are
-    //allocated
+   ofstream csv("sim_results.csv");
+   csv << "step,denied_requests,total_nodes_traversed,total_fragments\n";
 
     //seed rand()
     srand(time(NULL));
@@ -215,7 +211,7 @@ void run_simulation(MemoryManager& mem, Stats& stats) {
 
     const int percentage = 60; //60% allocate, 40% deallocate
 
-    for(int i =0; i < 10000; ++i) {
+    for(int step = 1; step <= 10000; ++step) {
         bool perform_allocate = allocate_or_not(percentage);
 
         //if no memory allocated, we must allocate
@@ -258,7 +254,14 @@ void run_simulation(MemoryManager& mem, Stats& stats) {
         cout << "\nCURRENT FRAGMENT COUNT: " << fragments << "\n";
 
         stats.record_fragment_count(fragments);
+
+        csv << step << ","
+            << stats.denied_requests << ","
+            << stats.total_nodes_traversed << ","
+            << stats.total_fragments << "\n";
     }
+
+    csv.close();
 }
 
 
