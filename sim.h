@@ -45,9 +45,16 @@ public:
 
 protected:
     void split_block(Block* block, int size_needed, int process_id) {
+        if(!block) {
+            return;
+        }
+        
         if(block->size > size_needed) {
+            Block* old_next = block->next;
             //allocate new block
             Block* new_block = new Block(block->start + size_needed, block->size - size_needed, false, -1 );
+
+            new_block->next = old_next;
 
             //reuse the current block
             block->size = size_needed;
