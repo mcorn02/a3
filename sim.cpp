@@ -50,7 +50,7 @@ int FirstFitMemory::deallocate_mem(int process_id) {
             current->process_id = -1;
 
             merge_block(prev, current);
-            return 1;
+            return 0;
         }
         prev = current;
         current = current->next;
@@ -132,7 +132,7 @@ int BestFitMemory::deallocate_mem(int process_id) {
             current->process_id = -1;
 
             merge_block(prev, current);
-            return 1;
+            return 0;
         }
         prev = current;
         current = current->next;
@@ -204,14 +204,12 @@ void run_simulation(MemoryManager& mem, Stats& stats) {
    ofstream csv("sim_results.csv");
    csv << "step,denied_requests,total_nodes_traversed,total_fragments\n";
 
-    //seed rand()
-    srand(time(NULL));
     vector<int> pids;
     int next_pid = 1;
 
     const int percentage = 60; //60% allocate, 40% deallocate
 
-    for(int step = 1; step <= 10000; ++step) {
+    for(int step = 1; step <= REQUESTS; ++step) {
         bool perform_allocate = allocate_or_not(percentage);
 
         //if no memory allocated, we must allocate
@@ -223,10 +221,11 @@ void run_simulation(MemoryManager& mem, Stats& stats) {
             //perform allocation
             //generate units to allocate 
             //between 3 and 10
-            int num_units = 3 + rand() % (8);            
+            int num_units = MIN_UNITS + rand() % (MAX_UNITS - MIN_UNITS + 1);            
             //allocate
             int traversed = mem.allocate_mem(next_pid, num_units);
-            bool success = (traversed != 1);
+            bool success = (traversed != -1);
+            //track nodes traversed or denied request
             stats.record_allocation(success ? traversed : 0, success);
             
             if(success) {
@@ -240,13 +239,16 @@ void run_simulation(MemoryManager& mem, Stats& stats) {
         } else {
             //perform deallocation
             int i = rand() % pids.size();
-            mem.deallocate_mem(pids[i]);
+            int pid = pids[i];
+            mem.deallocate_mem(pid);
             pids.erase(pids.begin() + i);
+            
+            //remove pid from list
+            pids[i] = pids.back();
+            pids.pop_back();
+
             cout << "After deallocation of PID: " << i << "\n";
             print_blocks(mem.get_head());
-
-            //track stats
-            stats.record_fragment_count(mem.fragment_count());
         }
 
         int fragments = mem.fragment_count();
@@ -268,6 +270,9 @@ void run_simulation(MemoryManager& mem, Stats& stats) {
 
 int main() {
     //BestFitMemory mem;
+    
+    srand(static_cast<unsigned>(time(nullptr)));
+
     Stats stats;
     FirstFitMemory mem;
 

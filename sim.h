@@ -61,6 +61,9 @@ protected:
             block->allocated = true;
             block->process_id = process_id;
             block->next = new_block;
+        } else { //exact fit
+            block->allocated = true;
+            block->process_id = process_id;
         }
     }
 };
