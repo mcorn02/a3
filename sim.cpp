@@ -211,8 +211,8 @@ bool allocate_or_not(int percentage) {
     return (rand() % 100) < percentage;
 }
 
-void run_simulation(MemoryManager& mem, Stats& stats) {
-   ofstream csv("sim_results.csv");
+void run_simulation(MemoryManager& mem, Stats& stats, const string& csv_filename) {
+   ofstream csv(csv_filename);
    csv << "step,denied_requests,total_nodes_traversed,total_fragments\n";
 
     vector<int> pids;
@@ -277,12 +277,12 @@ int main() {
 
     Stats ff_stats;
     FirstFitMemory ff;
-    run_simulation(ff, ff_stats);
+    run_simulation(ff, ff_stats, "first_fit_results.csv");
     ff_stats.print_summary("First Fit");
 
     BestFitMemory bf;
     Stats bf_stats;
-    run_simulation(bf, bf_stats);
+    run_simulation(bf, bf_stats, "best_fit_results.csv");
     bf_stats.print_summary("Best Fit");
 
     return 0;
