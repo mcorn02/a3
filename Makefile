@@ -4,7 +4,7 @@
 
 #Class Info: CS 480 Operating Systems, Summer Session 2 2025
 
-#Assignment #2: Experimental Shell "XSH"
+#Assignment 3
 
 #File Name: Makefile
 	
@@ -20,3 +20,5 @@ $(TARGET): sim.cpp
 
 clean:
 	rm -f $(TARGET) 
+	> first_fit_results.csv
+	> best_fit_results.csv
