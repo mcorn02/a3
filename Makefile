@@ -1,10 +1,13 @@
+#PLEASE RUN ON cssc1415
+
 #Team Names: Michael Corn and Simmon Quan
 
 #Edoras Usernames: cssc1415 and cssc1450
 
 #Class Info: CS 480 Operating Systems, Summer Session 2 2025
 
-#Assignment 3
+#Assignment 3: Memory Allocation/Deallocation Simulation
+
 
 #File Name: Makefile
 	
